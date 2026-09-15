@@ -634,14 +634,19 @@ jobs:
           ccache -s
           echo "编译后空间:"
           df -h || true
-      - name: 编译外部内核模块
-        run: |
-         echo "=== 1. 检查当前工作目录 ==="
-          ls -la $GITHUB_WORKSPACE
-          echo "=== 2. 进入模块目录 ==="
-          cd $GITHUB_WORKSPACE/my_module
-          echo "=== 3. 开始编译 ==="
-          make -C $GITHUB_WORKSPACE/kernel_workspace/common M=$GITHUB_WORKSPACE/my_module ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules
+          echo "开始编译外部模块:"
+          TARGET_DIR=$GITHUB_WORKSPACE/kernel_workspace/common/private/hello_module
+          mkdir -p $TARGET_DIR
+          cat << 'EOF' > $TARGET_DIR/hello_world.c
+          #include <linux/module.h>
+          #include <linux/kernel.h>
+          static int __init hello_init(void) { printk(KERN_INFO "Hello World: module loaded!\n"); return 0; }
+          static void __exit hello_exit(void) { printk(KERN_INFO "Hello World: module unloaded!\n"); }
+          module_init(hello_init); module_exit(hello_exit);
+          MODULE_LICENSE("GPL");
+          EOF
+          echo 'obj-m += hello_world.o' > $TARGET_DIR/Makefile
+          make -C $GITHUB_WORKSPACE/kernel_workspace/common M=$TARGET_DIR ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules || true
       - name: 保存新的 ccache 缓存
         if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
@@ -669,7 +674,7 @@ jobs:
           rm -rf ./AnyKernel3/.git
           cd AnyKernel3
           cp ../common/out/arch/arm64/boot/Image ./Image
-          cp $GITHUB_WORKSPACE/my_module/hello_world.ko ./hello_world.ko
+          cp $GITHUB_WORKSPACE/kernel_workspace/common/private/hello_module/hello_world.ko ./hello_world.ko || true
           if [[ ! -f ./Image ]]; then
             echo "未找到内核镜像文件，构建可能出错"
             exit 1
