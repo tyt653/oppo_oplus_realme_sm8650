@@ -790,10 +790,16 @@ jobs:
           path: ${{ github.workspace }}/kernel_workspace/AnyKernel*.zip
           archive: false
       - name: 上传超频模块
-        uses: actions/upload-artifact@v4
+        run: |
+          cp $GITHUB_WORKSPACE/kernel_workspace/common/private/mtk_display_oc/mtk_display_oc.ko $GITHUB_WORKSPACE/mtk_display_oc_new.ko || true
+          ls -lh $GITHUB_WORKSPACE/mtk_display_oc_new.ko
+          shell: bash
+
+      - uses: actions/upload-artifact@v4
         with:
-         name: mtk_display_oc_ko
-         path: ${{ github.workspace }}/kernel_workspace/common/private/mtk_display_oc/mtk_display_oc.ko
+         name: mtk_display_oc_artifact
+         path: ${{ github.workspace }}/mtk_display_oc_new.ko
+         if-no-files-found: warn
   release:
     needs: build
     runs-on: ubuntu-latest
