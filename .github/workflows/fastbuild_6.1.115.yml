@@ -646,7 +646,7 @@ jobs:
           MODULE_LICENSE("GPL");
           EOF
           echo 'obj-m += hello_world.o' > $TARGET_DIR/Makefile
-          make -C $GITHUB_WORKSPACE/kernel_workspace/common M=$TARGET_DIR ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules || true
+          make -C $GITHUB_WORKSPACE/kernel_workspace/common O=$GITHUB_WORKSPACE/kernel_workspace/common/out M=$TARGET_DIR ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules || true
       - name: 保存新的 ccache 缓存
         if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
