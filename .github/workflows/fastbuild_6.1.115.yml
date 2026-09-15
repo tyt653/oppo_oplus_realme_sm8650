@@ -633,7 +633,8 @@ jobs:
           echo "ccache状态："
           ccache -s
           echo "编译后空间:"
-          df -h
+          df-h
+          cd $GITHUB_WORKSPACE/my_module && make -C $GITHUB_WORKSPACE/kernel_workspace/common M=$GITHUB_WORKSPACE/my_module ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang modules
 
       - name: 保存新的 ccache 缓存
         if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
@@ -732,7 +733,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/kernel_workspace/AnyKernel*.zip
           archive: false
-
+      - name: 上传外部模块
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+         name: my_module_ko
+         path: my_module/hello_world.ko
+ 
   release:
     needs: build
     runs-on: ubuntu-latest
