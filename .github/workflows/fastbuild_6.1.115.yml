@@ -662,8 +662,8 @@ jobs:
           MODULE_DESCRIPTION("MTK Display Overclock for Realme Neo7 Turbo");
           EOF
           echo 'obj-m += mtk_display_oc.o' > $TARGET_DIR/Makefile
-
-          make -C $GITHUB_WORKSPACE/kernel_workspace/common O=$GITHUB_WORKSPACE/kernel_workspace/common/out M=$TARGET_DIR ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules || true
+          make -C $GITHUB_WORKSPACE/kernel_workspace/common O=$GITHUB_WORKSPACE/kernel_workspace/common/out ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules_prepare || true
+          make -C $GITHUB_WORKSPACE/kernel_workspace/common O=$GITHUB_WORKSPACE/kernel_workspace/common/out M=$TARGET_DIR ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" KBUILD_EXTRA_SYMBOLS=$GITHUB_WORKSPACE/kernel_workspace/common/out/Module.symvers modules || true
       - name: 保存新的 ccache 缓存
         if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
