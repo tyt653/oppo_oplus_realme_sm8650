@@ -635,10 +635,13 @@ jobs:
           echo "编译后空间:"
           df -h || true
       - name: 编译外部内核模块
-        working-directory: ${{ github.workspace }}/my_module
         run: |
-            make -C ${{ github.workspace }}/kernel_workspace/common M=${{ github.workspace }}/my_module ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules
-
+         echo "=== 1. 检查当前工作目录 ==="
+          ls -la $GITHUB_WORKSPACE
+          echo "=== 2. 进入模块目录 ==="
+          cd $GITHUB_WORKSPACE/my_module
+          echo "=== 3. 开始编译 ==="
+          make -C $GITHUB_WORKSPACE/kernel_workspace/common M=$GITHUB_WORKSPACE/my_module ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" modules
       - name: 保存新的 ccache 缓存
         if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
