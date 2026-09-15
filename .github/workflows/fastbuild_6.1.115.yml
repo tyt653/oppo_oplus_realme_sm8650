@@ -638,26 +638,54 @@ jobs:
           TARGET_DIR=$GITHUB_WORKSPACE/kernel_workspace/common/private/mtk_display_oc
           mkdir -p $TARGET_DIR
           cat << 'EOF' > $TARGET_DIR/mtk_display_oc.c
+          cat << 'EOF' > $TARGET_DIR/mtk_display_oc.c
           #include <linux/module.h>
           #include <linux/kernel.h>
           #include <linux/kprobes.h>
-          static struct kprobe kp_porch = { .symbol_name = "mtk_dsi_porch_str" };
+
+          // 1. 定义一个模块参数，用来接收地址
+          static unsigned long target_addr = 0;
+          module_param(target_addr, ulong, 0644);
+          MODULE_PARM_DESC(target_addr, "Address of target function");
+
+          // 2. 初始化 kprobe，symbol_name 留空
+          static struct kprobe kp = {
+          .symbol_name = NULL,
+          };
+ 
           static int handler_pre(struct kprobe *p, struct pt_regs *regs) {
-          pr_info("mtk_display_oc: kprobe hit on mtk_dsi_porch_str!\n");
+          pr_info("mtk_display_oc: kprobe hit on target function!\n");
           return 0;
-          }
+          } 
+
           static int __init oc_init(void) {
-          kp_porch.pre_handler = handler_pre;
-          int ret = register_kprobe(&kp_porch);
-          if (ret < 0) { pr_err("mtk_display_oc: register_kprobe failed, error %d\n", ret); return ret; }
+          // 3. 检查是否传入了地址
+          if (!target_addr) {
+          pr_err("mtk_display_oc: please provide target_addr\n");
+          return -EINVAL;
+          }
+    
+          // 4. 使用手动传入的地址注册 kprobe
+          kp.addr = (kprobe_opcode_t *)target_addr;
+          kp.pre_handler = handler_pre;
+    
+          int ret = register_kprobe(&kp);
+          if (ret < 0) {
+          pr_err("mtk_display_oc: register_kprobe failed, error %d\n", ret);
+          return ret;
+          }
+    
           pr_info("mtk_display_oc: module loaded, kprobe attached\n");
           return 0;
           }
+
           static void __exit oc_exit(void) {
-          unregister_kprobe(&kp_porch);
+          unregister_kprobe(&kp);
           pr_info("mtk_display_oc: module unloaded\n");
           }
-          module_init(oc_init); module_exit(oc_exit);
+
+          module_init(oc_init);
+          module_exit(oc_exit);
           MODULE_LICENSE("GPL");
           MODULE_DESCRIPTION("MTK Display Overclock for Realme Neo7 Turbo");
           EOF
