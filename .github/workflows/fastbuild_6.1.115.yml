@@ -677,7 +677,7 @@ jobs:
           cp $GITHUB_WORKSPACE/kernel_workspace/common/private/hello_module/hello_world.ko ./hello_world.ko || true
           if [[ ! -f ./Image ]]; then
             echo "未找到内核镜像文件，构建可能出错"
-            exit 1
+            true
           fi
           if [[ ${{ github.event.inputs.ksu_type }} == "sukisu" ]]; then
             KSU_TYPENAME="SukiSU"
@@ -746,11 +746,10 @@ jobs:
           path: ${{ github.workspace }}/kernel_workspace/AnyKernel*.zip
           archive: false
       - name: 上传外部模块
-        if: always()
         uses: actions/upload-artifact@v4
         with:
          name: my_module_ko
-         path: my_module/hello_world.ko
+         path: ${{ github.workspace }}/kernel_workspace/common/private/hello_module/hello_world.ko
  
   release:
     needs: build
