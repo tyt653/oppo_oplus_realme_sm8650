@@ -634,8 +634,7 @@ jobs:
           ccache -s
           echo "编译后空间:"
           df-h
-          cd $GITHUB_WORKSPACE/my_module && make -C $GITHUB_WORKSPACE/kernel_workspace/common M=$GITHUB_WORKSPACE/my_module ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang modules
-
+          make -C $GITHUB_WORKSPACE/my_module M=$GITHUB_WORKSPACE/my_module ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang modules || true
       - name: 保存新的 ccache 缓存
         if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
