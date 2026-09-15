@@ -578,19 +578,20 @@ jobs:
           cd kernel_workspace/common
           # --- 注入真我 Neo7 Turbo 面板驱动 ---
           echo "正在注入真我 Neo7 Turbo 的京东方面板驱动..."
-          ls -l ../../
-          cp ../../oplus24921*.c ./drivers/gpu/drm/panel/
+          PANEL_FILE=$(find $GITHUB_WORKSPACE -name "oplus24921*.c" | head -n 1)
+          echo "找到的驱动文件路径: $PANEL_FILE"
+          cp "$PANEL_FILE" ./drivers/gpu/drm/panel/
           echo "obj-\$(CONFIG_DRM_PANEL_OPLUS24921_NT36532W) += oplus24921_nt36532w_2800_2000_dual_dsi_vdo_144hz_csot.o" >> ./drivers/gpu/drm/panel/Makefile
-          cat >> ./drivers/gpu/drm/panel/Kconfig << 'EOF'
+           cat >> ./drivers/gpu/drm/panel/Kconfig << 'EOF'
           config DRM_PANEL_OPLUS24921_NT36532W
           tristate "OPLUS24921 NT36532W 144Hz panel"
           depends on DRM
           help
-          Realme Neo7 Turbo BOE 144Hz panel
+           Realme Neo7 Turbo BOE 144Hz panel
           EOF
           echo "CONFIG_DRM_PANEL_OPLUS24921_NT36532W=y" >> ./arch/arm64/configs/gki_defconfig
           echo "面板驱动注入完成！"
-           # --- 注入结束 ---
+          # --- 注入结束 -----
            
           wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/lib/libfakestat.so
           wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/lib/libfaketimeMT.so
