@@ -637,7 +637,8 @@ jobs:
           - name: 编译外部内核模块
           working-directory: ${{ github.workspace }}/my_module
           run: |
-          make -C ${{ github.workspace }}/kernel_workspace/common M=${{ github.workspace }}/my_module ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang modules
+          cd $GITHUB_WORKSPACE/my_module
+          make -C $GITHUB_WORKSPACE/kernel_workspace/common M=$GITHUB_WORKSPACE/my_module ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang modules
       - name: 保存新的 ccache 缓存
         if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
@@ -665,6 +666,7 @@ jobs:
           rm -rf ./AnyKernel3/.git
           cd AnyKernel3
           cp ../common/out/arch/arm64/boot/Image ./Image
+          cp $GITHUB_WORKSPACE/my_module/hello_world.ko ./hello_world.ko
           if [[ ! -f ./Image ]]; then
             echo "未找到内核镜像文件，构建可能出错"
             exit 1
