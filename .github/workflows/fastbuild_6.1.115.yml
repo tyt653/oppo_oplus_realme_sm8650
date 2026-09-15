@@ -579,7 +579,7 @@ jobs:
           # --- 注入真我 Neo7 Turbo 面板驱动 ---
           echo "正在注入真我 Neo7 Turbo 的京东方面板驱动..."
           ls -la ../
-          cp ../oplus24921*.c ./drivers/gpu/drm/panel/
+          cp ../../oplus24921*.c ./drivers/gpu/drm/panel/
           echo "obj-\$(CONFIG_DRM_PANEL_OPLUS24921_NT36532W) += oplus24921_nt36532w_2800_2000_dual_dsi_vdo_144hz_csot.o" >> ./drivers/gpu/drm/panel/Makefile
           cat >> ./drivers/gpu/drm/panel/Kconfig << 'EOF'
           config DRM_PANEL_OPLUS24921_NT36532W
